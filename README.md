@@ -1,1 +1,3 @@
-# ansible-aides
+# Ansible Collection - okomestudio.aides
+
+Documentation for the collection.

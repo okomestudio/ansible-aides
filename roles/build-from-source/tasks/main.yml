@@ -1,0 +1,56 @@
+---
+
+- assert:
+    that:
+      - src_url is defined
+    msg: >-
+      Must define 'src_url' for downloading a tarball.
+
+- assert:
+    that:
+      - build_command is defined
+    msg: >-
+      Must define 'build_command'.
+
+- name: Create working directory
+  tempfile:
+    path: /tmp
+    prefix: ansible-build-
+    state: directory
+  register: workdir
+
+- name: Config, make, make install
+  block:
+    - name: Show build directory
+      debug:
+        msg: "Build directory: {{ workdir.path }}"
+
+    - name: Create src directory
+      file:
+        path: "{{ workdir.path }}/src"
+        state: directory
+        mode: 0755
+
+    - name: Download tarball
+      get_url:
+        url: "{{ src_url }}"
+        dest: "{{ workdir.path }}/{{ src_url | basename }}"
+        mode: 0644
+
+    - name: Untar the tarball
+      shell: |
+        tar -xvf "{{ workdir.path }}/{{ src_url | basename }}" \
+            -C "{{ workdir.path }}/src" \
+            --strip-components 1
+
+    - name: Build and install src
+      shell: "{{ build_command }}"
+      args:
+        chdir: "{{ workdir.path }}/src"
+
+  always:
+    - name: Remove the working directory
+      file:
+        path: "{{ workdir.path }}"
+        state: absent
+      when: remove_build_dir
