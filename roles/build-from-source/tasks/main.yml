@@ -53,4 +53,4 @@
       file:
         path: "{{ workdir.path }}"
         state: absent
-      when: remove_build_dir
+      when: "{{ remove_build_dir | d('true') }}"
