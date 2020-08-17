@@ -1,0 +1,4 @@
+---
+
+dependencies:
+  - role: aws/ec2/base

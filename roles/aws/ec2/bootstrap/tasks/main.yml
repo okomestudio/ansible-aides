@@ -1,0 +1,16 @@
+---
+
+# Minimal configuration to apply to a Debian EC2 instance after it starts
+# running. This is a layer to do things that should only be done just once after
+# instance provision, but not repeatedly on each deployment.
+
+- name: Do minimal configuration
+  become: yes
+  block:
+    - name: Run apt-get update
+      apt:
+        update_cache: yes
+
+    - name: Run apt-get dist-upgrade
+      apt:
+        upgrade: dist
