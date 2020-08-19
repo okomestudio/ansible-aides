@@ -50,6 +50,7 @@
 
   always:
     - name: Remove the working directory
+      become: yes
       file:
         path: "{{ workdir.path }}"
         state: absent
