@@ -12,14 +12,21 @@
     msg: >-
       Must define 'build_command'.
 
+- name: Check if the build product already exists
+  stat:
+    path: "{{ creates }}"
+  register: stat_result
+
 - name: Create working directory
   tempfile:
     path: /tmp
     prefix: ansible-build-
     state: directory
   register: workdir
+  when: not stat_result.stat.exists
 
 - name: Config, make, make install
+  when: not stat_result.stat.exists
   block:
     - name: Show build directory
       debug:
