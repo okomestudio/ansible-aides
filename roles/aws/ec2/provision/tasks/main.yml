@@ -15,6 +15,7 @@
 - name: Confirm before proceeding
   pause:
     prompt: Check the tags above and then press Ctrl-C to proceed.
+  when: "not {{ skip_confirm | d(false) }}"
 
 - name: Provision EC2 instances
   ec2:
