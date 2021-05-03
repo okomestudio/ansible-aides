@@ -38,17 +38,30 @@
         state: directory
         mode: 0755
 
-    - name: Download tarball
+    - name: Download archive
       get_url:
         url: "{{ src_url }}"
         dest: "{{ workdir.path }}/{{ src_url | basename }}"
         mode: 0644
+
+    - name: The downloaded file is a zip file
+      block:
+        - name: Unzip the archive
+          ansible.builtin.unarchive:
+            src: "{{ workdir.path }}/{{ src_url | basename }}"
+            dest: "{{ workdir.path }}/src"
+
+        - set_fact:
+            archive_is_zip: true
+
+      when: src_url.endswith('.zip') is true
 
     - name: Untar the tarball
       shell: |
         tar -xvf "{{ workdir.path }}/{{ src_url | basename }}" \
             -C "{{ workdir.path }}/src" \
             --strip-components 1
+      when: archive_is_zip is not defined
 
     - name: Build and install src
       shell: "{{ build_command }}"
@@ -57,8 +70,7 @@
 
   always:
     - name: Remove the working directory
-      become: yes
       file:
         path: "{{ workdir.path }}"
         state: absent
-      when: "{{ remove_build_dir | d('true') }}"
+      when: remove_build_dir is defined and remove_build_dir is true
